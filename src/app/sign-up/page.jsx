@@ -4,10 +4,13 @@ import Image from "next/image";
 import { IoMdEyeOff, IoMdEye } from "react-icons/io";
 import Link from "next/link";
 import OAuth from "@/components/OAuth";
+import { getAuth, createUserWithEmailAndPassword,updateProfile } from "firebase/auth";
+import { db } from "@/firebase";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 
 export default function page() {
   const [formData, setFormData] = useState({
-    name:"",
+    name: "",
     email: "",
     password: "",
   });
@@ -17,6 +20,33 @@ export default function page() {
       ...formData,
       [e.target.id]: e.target.value,
     });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const auth = getAuth();
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+      updateProfile(auth.currentUser,{
+        displayName:formData.name
+      })
+      const user = userCredential.user;
+      const formDataCopy={...formData};
+      delete formDataCopy.password;
+      formDataCopy.timestamp=serverTimestamp();
+      // console.log("formDataCopy:", formDataCopy);
+
+
+      await setDoc(doc(db,"users",user.uid),formDataCopy)
+
+      
+    } catch (error) {
+      console.log(error);
+    }
   };
   const [showPassword, setShowPassword] = useState(false);
   return (
@@ -33,8 +63,8 @@ export default function page() {
           />
         </div>
         <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
-          <form>
-          <input
+          <form onSubmit={handleSubmit}>
+            <input
               className="mb-6 w-full px-4 py-4 text-xl text-gray-700 bg-white border-gray-300 rounded transition ease-in-out"
               placeholder="Full Name"
               type="name"
@@ -105,7 +135,7 @@ export default function page() {
             >
               <p className="text-center font-semibold mx-4 ">OR</p>
             </div>
-            <OAuth/>
+            <OAuth />
           </form>
         </div>
       </div>
