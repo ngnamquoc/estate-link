@@ -4,11 +4,18 @@ import Image from "next/image";
 import { IoMdEyeOff, IoMdEye } from "react-icons/io";
 import Link from "next/link";
 import OAuth from "@/components/OAuth";
-import { getAuth, createUserWithEmailAndPassword,updateProfile } from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 import { db } from "@/firebase";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 export default function page() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -21,7 +28,7 @@ export default function page() {
       [e.target.id]: e.target.value,
     });
   };
-
+  // sign up new user
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -31,21 +38,20 @@ export default function page() {
         formData.email,
         formData.password
       );
-      updateProfile(auth.currentUser,{
-        displayName:formData.name
-      })
+      updateProfile(auth.currentUser, {
+        displayName: formData.name,
+      });
       const user = userCredential.user;
-      const formDataCopy={...formData};
+      const formDataCopy = { ...formData };
       delete formDataCopy.password;
-      formDataCopy.timestamp=serverTimestamp();
-      // console.log("formDataCopy:", formDataCopy);
+      formDataCopy.timestamp = serverTimestamp();
 
-
-      await setDoc(doc(db,"users",user.uid),formDataCopy)
-
-      
+      await setDoc(doc(db, "users", user.uid), formDataCopy);
+      toast.success("Sign up successfully!"); 
+      router.push("/");
     } catch (error) {
-      console.log(error);
+      // console.log(error);
+      toast.error("Something went wrong. Please try again!")
     }
   };
   const [showPassword, setShowPassword] = useState(false);
