@@ -66,6 +66,7 @@ export default function page() {
             alt="toronto-city"
             width={500}
             height={500}
+            priority
           />
         </div>
         <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
