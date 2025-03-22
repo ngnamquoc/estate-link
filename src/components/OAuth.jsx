@@ -22,7 +22,7 @@ export default function OAuth() {
       // check user existence in db
       const docRef = doc(db, "users", user.uid);
       const docSnap = await getDoc(docRef);
-      // case not existed
+      // case not existed, add to db-users
       if (!docSnap.exists()) {
         await setDoc(docRef, {
           name: user.displayName,

@@ -4,8 +4,12 @@ import Image from "next/image";
 import { IoMdEyeOff, IoMdEye } from "react-icons/io";
 import Link from "next/link";
 import OAuth from "@/components/OAuth";
+import { signInWithEmailAndPassword, getAuth } from "firebase/auth";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 export default function page() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -18,6 +22,22 @@ export default function page() {
     });
   };
   const [showPassword, setShowPassword] = useState(false);
+  const handleSignIn = async (e) => {
+    e.preventDefault();
+    try {
+      const auth = getAuth();
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+      if (userCredential.user) {
+        router.push("/");
+      }
+    } catch (error) {
+      toast.error("Wrong username or password!");
+    }
+  };
   return (
     <section>
       <h1 className="mx-auto text-center text-3xl mt-6 font-bold">Sign In</h1>
@@ -32,7 +52,7 @@ export default function page() {
           />
         </div>
         <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
-          <form>
+          <form onSubmit={handleSignIn}>
             <input
               className="mb-6 w-full px-4 py-4 text-xl text-gray-700 bg-white border-gray-300 rounded transition ease-in-out"
               placeholder="Email"
@@ -97,7 +117,7 @@ export default function page() {
             >
               <p className="text-center font-semibold mx-4 ">OR</p>
             </div>
-            <OAuth/>
+            <OAuth />
           </form>
         </div>
       </div>
