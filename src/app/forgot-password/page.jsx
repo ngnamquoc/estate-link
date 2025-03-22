@@ -3,12 +3,24 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import OAuth from "@/components/OAuth";
+import { getAuth, sendPasswordResetEmail } from "firebase/auth";
+import { toast } from "react-toastify";
 
 export default function page() {
   const [email, setEmail] = useState("");
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     setEmail(e.target.value);
+  };
+  const handleResetPass = async (e) => {
+    e.preventDefault();
+    try {
+      const auth = getAuth();
+      await sendPasswordResetEmail(auth, email);
+      toast.success("Reset link was sent successfully!");
+    } catch (error) {
+      toast.error("Error sending reset password. Please try again!");
+    }
   };
   return (
     <section>
@@ -23,10 +35,11 @@ export default function page() {
             alt="toronto-city"
             width={500}
             height={500}
+            priority
           />
         </div>
         <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
-          <form>
+          <form onSubmit={handleResetPass}>
             <input
               className="mb-6 w-full px-4 py-4 text-xl text-gray-700 bg-white border-gray-300 rounded transition ease-in-out"
               placeholder="Email"
